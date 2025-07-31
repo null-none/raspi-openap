@@ -12,24 +12,18 @@ Ansible playbook to configure a Raspberry Pi as a Wi-Fi access point **without a
 
 ## Usage
 
-1. Clone this repo:
-    ```bash
-    git clone https://github.com/your-username/raspi-openap.git
-    cd raspi-openap
-    ```
-
-2. Update `inventory.ini` with your Raspberry Pi IP or hostname:
+1. Update `inventory.ini` with your Raspberry Pi IP or hostname:
     ```ini
     [raspberry]
     raspberrypi.local ansible_user=pi ansible_ssh_pass=raspberry ansible_become=true
     ```
 
-3. Run the playbook:
+2. Run the playbook:
     ```bash
     ansible-playbook -i inventory.ini playbook.yml
     ```
 
-4. Check log:
+3. Check log:
     ```bash
     sudo tail -f /var/log/wifi_clients.log
     ```
