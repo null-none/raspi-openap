@@ -1,0 +1,10 @@
+[Unit]
+Description=Log connected Wi-Fi clients every 10 seconds
+After=network.target
+
+[Service]
+ExecStart=/bin/bash -c 'while true; do echo "==== $(date) ====" >> /var/log/wifi_clients.log; iw dev wlan0 station dump >> /var/log/wifi_clients.log; sleep 10; done'
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

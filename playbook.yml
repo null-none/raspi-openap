@@ -1,0 +1,5 @@
+- name: Configure Raspberry Pi as open Wi-Fi access point
+  hosts: raspberry
+  become: yes
+  roles:
+    - wifi_ap

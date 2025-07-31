@@ -1,0 +1,72 @@
+- name: Install required packages
+  apt:
+    name:
+      - hostapd
+      - dnsmasq
+      - iw
+    state: present
+    update_cache: yes
+
+- name: Stop services to configure them
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+  loop:
+    - hostapd
+    - dnsmasq
+
+- name: Configure hostapd
+  template:
+    src: hostapd.conf.j2
+    dest: /etc/hostapd/hostapd.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Configure dnsmasq
+  template:
+    src: dnsmasq.conf.j2
+    dest: /etc/dnsmasq.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Configure static IP for wlan0
+  blockinfile:
+    path: /etc/dhcpcd.conf
+    marker: "# {mark} ANSIBLE_WIFI_STATIC"
+    block: |
+      interface wlan0
+          static ip_address=192.168.4.1/24
+          nohook wpa_supplicant
+
+- name: Enable hostapd config
+  lineinfile:
+    path: /etc/default/hostapd
+    regexp: '^#?DAEMON_CONF=.*'
+    line: 'DAEMON_CONF="/etc/hostapd/hostapd.conf"'
+
+- name: Enable services
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+  loop:
+    - hostapd
+    - dnsmasq
+
+- name: Copy systemd service for Wi-Fi client logging
+  template:
+    src: log_wifi_clients.service.j2
+    dest: /etc/systemd/system/log_wifi_clients.service
+    mode: '0644'
+
+- name: Enable and start logging service
+  systemd:
+    name: log_wifi_clients.service
+    enabled: yes
+    state: started
+
+- name: Reboot to apply changes
+  reboot:
+    msg: "Reboot initiated by Ansible to apply Wi-Fi access point settings."
+    reboot_timeout: 120
